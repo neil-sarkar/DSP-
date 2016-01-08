@@ -224,7 +224,9 @@ int main ( void )
 	
     while (1) {
          // Change frequency when BUTTON4 is pressed
-        if (BUTTON4 == 0) {
+        if (BUTTON4 == 0) { 
+            
+         
 //            // Prepare for sweep
 //            // Measure DC offset
 //            // perform an initial sample set to get the DC offset without the
@@ -260,7 +262,7 @@ int main ( void )
             changeFreq();
         }
 
-        if (sweep_in_progress == 1 && t4_ms_counter > 100) {
+        if (sweep_in_progress == 1 && t4_ms_counter > 16) {
             t4_ms_counter = 0;
             if (current_freq > 7000){
                 sweep_in_progress = 0;
@@ -321,7 +323,7 @@ int main ( void )
 			    puts_lcd(sBuff, strlen(sBuff));
 #endif
 			    
-				sprintf(sBuff, "%8.4f, %8.4f, %lu\r", fI, fQ, current_freq);
+				sprintf(sBuff, "%lu, %8.4f, %8.4f\r", current_freq, mag, phi);
 				RS232XMT(sBuff);
 				if (BUTTON1 == 0)
 					stateDisplay = DISPLAY_DEFAULT;

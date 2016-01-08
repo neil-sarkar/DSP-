@@ -136,8 +136,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _DMA0Interrupt( void )
 	// very low frequency final filter with Fpass=0.001Hz and Fstop=2Hz
 //	FIR(1, (fractional*) fTI, (fractional*) &fTI[0], &fir0012FilterI);
 //	FIR(1, (fractional*) fTQ, (fractional*) &fTQ[0], &fir0012FilterQ);
-	fin = fTI[0];
-	fqn = fTQ[0];
+	fin = In[0];
+	fqn = Qn[0];
     
     //For dumping raw I and Q values only! TESTing
 //    fin = In[1 * 10];
