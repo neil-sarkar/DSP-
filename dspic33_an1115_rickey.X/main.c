@@ -225,9 +225,9 @@ int main ( void )
     while (1) {
          // Change frequency when BUTTON4 is pressed
         if (BUTTON4 == 0) {
-            // Prepare for sweep
-            // Measure DC offset
-            // perform an initial sample set to get the DC offset without the
+//            // Prepare for sweep
+//            // Measure DC offset
+//            // perform an initial sample set to get the DC offset without the
             // T2 ISR running
             T2CONbits.TON = 0;
             outVal = LATG & 0x0FFF;
@@ -249,29 +249,24 @@ int main ( void )
             DCOffset = (fractional) (accumulatedDC / 16);
             DCOffset /= 2;	// because we are outputting the full signal
             DCOffset = -DCOffset;   
-            
+//            
             // Start sweeping
             sweep_in_progress = 1;
-            current_freq = 7500;
+            current_freq = 6000;
             T2CONbits.TON = 1;
             T3CONbits.TON = 1;
             
             while (BUTTON4 == 0);
             changeFreq();
-//            if(t2==5000){
-//                t2 = 6660;
-//            } else if (t2==6660){
-//                t2 = 8000;
-//            } else {
-//                t2 = 5000;
-//            }
-            //t2 = t2 + 1000;
         }
-        if (sweep_in_progress == 1 && t4_ms_counter > 1000) {
+
+        if (sweep_in_progress == 1 && t4_ms_counter > 100) {
             t4_ms_counter = 0;
-            if (current_freq > 8150) {
+            if (current_freq > 7000){
                 sweep_in_progress = 0;
             } else {
+                SampleReady = 0;
+                while (SampleReady == 0);
                 changeFreq();
                 current_freq = current_freq + 5;
             }
@@ -279,8 +274,7 @@ int main ( void )
         
 	    // wait for the next block of processed data SampleReady set in DMA ISR
 	    // synchronise with DMA routine to ensure clean data
-		SampleReady = 0;
-		while (SampleReady == 0);
+
 		
 		// handle sync change
 //		if (BUTTON4 == 0) {
@@ -319,9 +313,11 @@ int main ( void )
 #ifdef USE_LCD
 			    home_it();	 
 	    		sprintf(sBuff, "Mag = %8.5f     ", mag);
+//                sprintf(sBuff, "I = %8.5f     ", fI);
 				puts_lcd(sBuff, strlen(sBuff));	    
 			    line_2();
 			    sprintf(sBuff, "Phi = %8.3f     ", phi);
+//                sprintf(sBuff, "Q = %8.3f     ", fQ);
 			    puts_lcd(sBuff, strlen(sBuff));
 #endif
 			    
