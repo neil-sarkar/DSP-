@@ -111,8 +111,9 @@ void filterInit(void)
 ///////////////////////////////////////////////////////////////////
 
 void setFreq(int frequency) {
-    PR2 = ((unsigned long)(2500000/frequency)-1);
+    PR2 = (unsigned long)(2500000/frequency)-1;
     PR3 = (unsigned long)(2500000/frequency)*4-1;
+    current_freq = frequency;
     return;
     // We will have to deal with the synchronization once we get the filters going
 }
@@ -206,69 +207,25 @@ int main ( void )
 	
     while (1) {
          // Change frequency when BUTTON4 is pressed
-        if (BUTTON4 == 0) {
+        if (BUTTON4 == 0 && !sweep_in_progress) { 
+            // we currently don't allow the sweep to restart if it's already sweeping because the phase angle doesn't turn out right
             SampleReady = 0;
             while (SampleReady == 0);
-//            TMR2 = 0;
-//            TMR3 = 0;
-//            T3CONbits.TON = 0;
-//            T2CONbits.TON = 0;
-            
-         
-            // Prepare for sweep
-            // Measure DC offset
-            // perform an initial sample set to get the DC offset without the
-            // T2 ISR running
-//            T2CONbits.TON = 0;
-//            outVal = LATG & 0x0FFF;
-//            LATG = (63 << 10) | outVal;
-
-//            SampleOffset = 0;
-  
-//            TMR3 = 0;
-//            T3CONbits.TON = 1;
-//            Delay(Delay_15mS_Cnt);
-            
-//            DCOffset = 0;
-//            SampleOffset = 1;
-//            accumulatedDC = 0;
-//            for(i = 0; i < 16; i++) {
-//                SampleReady = 0;
-//                while (SampleReady == 0);
-//                accumulatedDC += DCCurrentReading;
-//            }
-//            SampleOffset = 0;
-//            T3CONbits.TON = 0;
-//            DCOffset = (fractional) (accumulatedDC / 16);
-//            DCOffset /= 2;	// because we are outputting the full signal
-//            DCOffset = -DCOffset;     
-            // Start sweeping
+            setFreq(6000);
             sweep_in_progress = 1;
-            current_freq = 6000;
-            setFreq(current_freq);
         }
-
-        if (sweep_in_progress == 1 && t4_ms_counter > 16) {
-            t4_ms_counter = 0;
-            if (current_freq > 7000){
+        
+        // shouldn't this be in the t4 interrupt routine
+        if (sweep_in_progress == 1 && t4_ms_counter >= 15) {
+            if (current_freq >= 7000){
                 sweep_in_progress = 0;
             } else {
                 SampleReady = 0;
                 while (SampleReady == 0);
-                current_freq += 5;
-                setFreq(current_freq);
+                setFreq(current_freq + 5);
+                t4_ms_counter = 0;
             }
         }
-        
-	    // wait for the next block of processed data SampleReady set in DMA ISR
-	    // synchronise with DMA routine to ensure clean data
-
-		
-		// handle sync change
-//		if (BUTTON4 == 0) {
-//			TMR5++;
-//			while (BUTTON4 == 0);	
-//		}
 		
 		// copy sample values across to local storage so they do not
 		// get corrupted by the ISRs if we take a while processing them here	
