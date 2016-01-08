@@ -65,7 +65,7 @@ extern unsigned long current_freq;
 ///////////////////////////////////////////////////////////////////
 void Init_Timers( void )
 {
-    current_freq = 5000;
+    current_freq = 6000;
             
 	// set up timer 2 to interrupt at at a rate of 16 points per full
 	// wave at 25kHz (this equals an interrupt rate of 400kHz)
