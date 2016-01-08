@@ -110,10 +110,11 @@ void filterInit(void)
 ///
 ///////////////////////////////////////////////////////////////////
 
-void changeFreq() {
-    PR2 = ((unsigned long)(2500000/current_freq)-1);
-    PR3 = (unsigned long)(2500000/current_freq)*4-1;
+void setFreq(int frequency) {
+    PR2 = ((unsigned long)(2500000/frequency)-1);
+    PR3 = (unsigned long)(2500000/frequency)*4-1;
     return;
+    // We will have to deal with the synchronization once we get the filters going
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -205,52 +206,57 @@ int main ( void )
 	
     while (1) {
          // Change frequency when BUTTON4 is pressed
-        if (BUTTON4 == 0) { 
+        if (BUTTON4 == 0) {
+            SampleReady = 0;
+            while (SampleReady == 0);
+//            TMR2 = 0;
+//            TMR3 = 0;
+//            T3CONbits.TON = 0;
+//            T2CONbits.TON = 0;
             
          
             // Prepare for sweep
             // Measure DC offset
             // perform an initial sample set to get the DC offset without the
             // T2 ISR running
-            T2CONbits.TON = 0;
-            outVal = LATG & 0x0FFF;
-            LATG = (63 << 10) | outVal;
-            SampleOffset = 0;
-            TMR3 = 0;
-            T3CONbits.TON = 1;
-            Delay(Delay_15mS_Cnt);
-            DCOffset = 0;
-            SampleOffset = 1;
-            accumulatedDC = 0;
-            for(i = 0; i < 16; i++) {
-                SampleReady = 0;
-                while (SampleReady == 0);
-                accumulatedDC += DCCurrentReading;
-            }
-            SampleOffset = 0;
-            T3CONbits.TON = 0;
-            DCOffset = (fractional) (accumulatedDC / 16);
-            DCOffset /= 2;	// because we are outputting the full signal
-            DCOffset = -DCOffset;     
+//            T2CONbits.TON = 0;
+//            outVal = LATG & 0x0FFF;
+//            LATG = (63 << 10) | outVal;
+
+//            SampleOffset = 0;
+  
+//            TMR3 = 0;
+//            T3CONbits.TON = 1;
+//            Delay(Delay_15mS_Cnt);
+            
+//            DCOffset = 0;
+//            SampleOffset = 1;
+//            accumulatedDC = 0;
+//            for(i = 0; i < 16; i++) {
+//                SampleReady = 0;
+//                while (SampleReady == 0);
+//                accumulatedDC += DCCurrentReading;
+//            }
+//            SampleOffset = 0;
+//            T3CONbits.TON = 0;
+//            DCOffset = (fractional) (accumulatedDC / 16);
+//            DCOffset /= 2;	// because we are outputting the full signal
+//            DCOffset = -DCOffset;     
             // Start sweeping
             sweep_in_progress = 1;
             current_freq = 6000;
-            T2CONbits.TON = 1;
-            T3CONbits.TON = 1;
-            
-            while (BUTTON4 == 0);
-            changeFreq();
+            setFreq(current_freq);
         }
 
-        if (sweep_in_progress == 1 && t4_ms_counter > 32) {
+        if (sweep_in_progress == 1 && t4_ms_counter > 16) {
             t4_ms_counter = 0;
             if (current_freq > 7000){
                 sweep_in_progress = 0;
             } else {
                 SampleReady = 0;
                 while (SampleReady == 0);
-                changeFreq();
-                current_freq = current_freq + 5;
+                current_freq += 5;
+                setFreq(current_freq);
             }
         }
         
