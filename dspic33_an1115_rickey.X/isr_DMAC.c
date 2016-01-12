@@ -87,7 +87,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _DMA0Interrupt( void )
 	fractional* ptCopySig;		
 	unsigned int i;
 	long avValue;
-	
+
 	// copy the data to the result buffer
 	if (DMACS1bits.PPST0 == 0) {
 		// data is in the first part of the ADC buffer	
@@ -139,10 +139,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _DMA0Interrupt( void )
 	fin = fTI[0];
 	fqn = fTQ[0];
     
-    //For dumping raw I and Q values only! TESTing
-//    fin = In[1 * 10];
-//	fqn = Qn[1 * 10];
-	
 	SampleReady = 1;
 
 	IFS0bits.DMA0IF = 0;            // reset DMA interrupt flag  
