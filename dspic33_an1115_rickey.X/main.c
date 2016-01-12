@@ -230,7 +230,7 @@ int main ( void )
         }
         
         // shouldn't this be in the t4 interrupt routine
-        if (sweep_in_progress == 1 && t4_ms_counter >= 3) { 
+        if (sweep_in_progress == 1 && t4_ms_counter >= 1) { 
             // only check for if the timer > one ms here because the rest will 
             // be taken care of with the empty while loop below
             if (current_freq >= 7000){

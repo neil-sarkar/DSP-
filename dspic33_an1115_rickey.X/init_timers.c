@@ -89,7 +89,7 @@ void Init_Timers( void )
     // Set up TMR4 for interrupting our ms counter
     T4CON = 0;
     T4CONbits.TCKPS = 0x0;  //Prescaler to 0
-	PR4 = 40000-1; //One tick each 1ms
+	PR4 = 99; //One tick each 0.25ms
 	TMR4 = 0;
     IFS1bits.T4IF = 0; // Clear Timer4 Interrupt Flag
     IEC1bits.T4IE = 1; // Enable Timer4 interrupt
