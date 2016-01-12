@@ -111,9 +111,23 @@ void filterInit(void)
 ///////////////////////////////////////////////////////////////////
 
 void setFreq(int frequency) {
+    SampleReady = 0;
+    while (SampleReady == 0);
+    // turn off timers
+    T2CONbits.TON = 0;
+    T3CONbits.TON = 0;
+    T4CONbits.TON = 0;
+    IFS0bits.T2IF = 0;
+    IFS0bits.T3IF = 0;
+    // change the frequency
     PR2 = (unsigned long)(2500000/frequency)-1;
     PR3 = (unsigned long)(2500000/frequency)*4-1;
     current_freq = frequency;
+    t4_ms_counter = 0; // reset the counter
+    // re-enable the timers
+    T2CONbits.TON = 1;
+    T3CONbits.TON = 1;
+    T4CONbits.TON = 1;
     return;
     // We will have to deal with the synchronization once we get the filters going
 }
@@ -216,14 +230,13 @@ int main ( void )
         }
         
         // shouldn't this be in the t4 interrupt routine
-        if (sweep_in_progress == 1 && t4_ms_counter >= 15) {
+        if (sweep_in_progress == 1 && t4_ms_counter >= 3) { 
+            // only check for if the timer > one ms here because the rest will 
+            // be taken care of with the empty while loop below
             if (current_freq >= 7000){
                 sweep_in_progress = 0;
             } else {
-                SampleReady = 0;
-                while (SampleReady == 0);
-                setFreq(current_freq + 5);
-                t4_ms_counter = 0;
+                setFreq(current_freq + 5);                
             }
         }
 		
@@ -262,11 +275,12 @@ int main ( void )
 				puts_lcd(sBuff, strlen(sBuff));	    
 			    line_2();
 			    sprintf(sBuff, "Phi = %8.3f     ", phi);
-//                sprintf(sBuff, "Q = %8.3f     ", fQ);
+//                sprintf(sBuff, "Q = %8.5f     ", fQ);
 			    puts_lcd(sBuff, strlen(sBuff));
 #endif
 			    
-				sprintf(sBuff, "%lu, %8.4f, %8.4f\r", current_freq, mag, phi);
+                sprintf(sBuff, "%lu, %8.4f, %8.4f\r", current_freq, mag, phi);
+//				sprintf(sBuff, "%lu, %8.4f, %8.4f\r", current_freq, fI, fQ);
 				RS232XMT(sBuff);
 				if (BUTTON1 == 0)
 					stateDisplay = DISPLAY_DEFAULT;
